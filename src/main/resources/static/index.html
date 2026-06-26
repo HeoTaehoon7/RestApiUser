@@ -150,6 +150,25 @@
         datalist_display( datalist );
     }
 
+    // data_insert()
+    async function data_insert() {
+        const options = {
+            method: 'POST',
+            body: JSON.stringify( {
+                userid: 'foo',
+                passwd: 'bar',
+                username: 'foobar',
+                email : 'foo@bar.com'
+            }),
+            headers: {
+                'Content-type': 'application/json; charset=UTF-8',
+            }
+        }
+        await requestJson(API_URL, options);
+        text_clear()
+        await loadUsers();
+    }
+
     // requestJson()
     async function requestJson(url, options = {}) {
         const response = await fetch(url, options);
@@ -199,8 +218,9 @@
         const  div1El = document.querySelector('#div1');
         div1El.addEventListener('dblclick', event => {   // mouseover
             //console.log( event.target );   // td
-            let tds = event.target.parentElement.children;
-            console.log(tds);
+            // let tds = event.target.parentElement.children;
+            let tds = event.target.closest('tr').children;
+            console.dir(tds);
               // HTMLCollection(5) [td, td, td, td, td]
               //  tds.forEach() 로 출력안됨 : tag collection
 
@@ -211,6 +231,7 @@
             const indateEl = document.getElementById('indate');
 
             Array.from(tds).forEach( (td, i) => { // 작동한다
+               if( td.tagName != "TD" ) return;
                console.dir( td )
                switch ( i ) {
                    case 0: useridEl.value   = td.innerHTML; break;
@@ -220,14 +241,24 @@
                }
             })
 
-
         })
 
         // -------------------
+        // a tag 를 버튼으로 사용하려면 기본이벤트( href 롤 이동)를 무력화하고 사용해야한다
         // 추가버튼 클릭
         const  btnInserEl = document.getElementById('btnInsert');
-        btnInserEl.addEventListener('click', async function() {
-            alert('추가')
+        btnInserEl.addEventListener('click', async function( event ) {
+           // alert('추가')
+            console.log( event );
+            event.preventDefault(); // 기본이벤트 취소
+            event.stopPropagation();
+
+            try {
+                await data_insert();
+            } catch (err) {
+                console.log(err);
+                alert('오류발생')
+            }
         })
 
         // -------------------
